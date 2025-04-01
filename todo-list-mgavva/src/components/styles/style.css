@@ -1,0 +1,7 @@
+.list-item:hover {
+    text-decoration: line-through;
+}
+
+li::marker {
+    margin-right: 2rem;
+}
