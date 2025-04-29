@@ -8,12 +8,12 @@ import { useEffect, useState } from "react";
 import '../styles/style.css'
 const baseUrl = 'https://demo2.z-bit.ee'
 let searchTimeout = null;
-
+let API_TOKEN = ''
+// TEST_TOKEN = gt7ljuqzOYky8vumX47QzAz3QyOmbIE6
 export default function TaskList() {
 
     const [tasks, setTasks] = useState([]);
     const [inputValue, setInputValue] = useState('');
-    const [API_TOKEN, setToken] = useState('');
     const [showToast, setShowToast] = useState(false);
 
     const handleCheck = async (event, task) => {
@@ -29,6 +29,7 @@ export default function TaskList() {
         ));
     }
     const sendRequest = async (method, endpoint, body) => {
+        console.log(`API_TOKEN: ${API_TOKEN}`)
         const options = {
             method: method.toUpperCase(),
             headers: {
@@ -70,7 +71,7 @@ export default function TaskList() {
     }
 
     const tokenEntered = async (input) => {
-        setToken(input.target.value)
+        API_TOKEN = input.target.value
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(async () => {
             await getTasks();
