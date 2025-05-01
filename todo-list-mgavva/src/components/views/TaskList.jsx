@@ -9,13 +9,11 @@ import Modal from 'react-bootstrap/Modal'
 import '../styles/style.css';
 
 const baseUrl = 'https://demo2.z-bit.ee';
-let searchTimeout = null;
 // TEST_TOKEN = gt7ljuqzOYky8vumX47QzAz3QyOmbIE6
 
 export default function TaskList() {
     const [tasks, setTasks] = useState([]);
     const [inputValue, setInputValue] = useState('');
-    const [showToast, setShowToast] = useState(false);
     const [showTokenModal, setShowTokenModal] = useState(false);
     const [editingTask, setEditingTask] = useState(null)
     const [newTaskTitle, setNewTaskTitle] = useState('')
@@ -36,7 +34,7 @@ export default function TaskList() {
     };
 
     const sendRequest = async (method, endpoint, token, body) => {
-        console.log(`API_TOKEN: ${API_TOKEN}`);
+        API_TOKEN = localStorage.getItem('apiToken');
         const options = {
             method: method.toUpperCase(),
             headers: {
@@ -59,7 +57,6 @@ export default function TaskList() {
             return await response.json();
         } catch (error) {
             console.error(error);
-            setShowToast(true);
         }
     };
 
@@ -69,19 +66,13 @@ export default function TaskList() {
     };
 
     const sendTask = async (title) => {
-        const data = await sendRequest('post', 'tasks', API_TOKEN, { title });
-        return data;
+        return await sendRequest('post', 'tasks', API_TOKEN, { title });
     };
 
-    const tokenEntered = async (input) => {
-        const token = input.target.value;
-
-        localStorage.setItem('apiToken', token);
-
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(async () => {
-            await getTasks();
-        }, 750);
+    const tokenEntered = async () => {
+        const token = document.getElementById('inputToken').value;
+        localStorage.setItem('apiToken', token)
+        await getTasks();
     };
 
     const removeTask = async (id) => {
@@ -109,7 +100,7 @@ export default function TaskList() {
     };
 
     const cancelEditing = () => {
-        setEditingTask(null); 
+        setEditingTask(null);
         setNewTaskTitle('');
     };
 
@@ -147,7 +138,6 @@ export default function TaskList() {
                 <Modal.Body>
                     <Form.Control
                         type="password"
-                        onChange={tokenEntered}
                         id="inputToken"
                         placeholder="API Token"
                         aria-label="API Token"
@@ -157,7 +147,10 @@ export default function TaskList() {
                     <Button variant="secondary" onClick={() => setShowTokenModal(false)}>
                         Close
                     </Button>
-                    <Button variant="primary" onClick={() => setShowTokenModal(false)}>
+                    <Button variant="primary" onClick={() => {
+                        setShowTokenModal(false)
+                        tokenEntered()
+                    }}>
                         Submit
                     </Button>
                 </Modal.Footer>
@@ -200,6 +193,8 @@ export default function TaskList() {
                     <div>Please enter your API token to continue.</div>
                 ) : tasks.message ? (
                     <div>Some error occurred: <b>{tasks.message}</b></div>
+                ) : tasks.length <= 0 ? (
+                    <div>There is no tasks yet.</div>
                 ) : (
                     tasks.map((task) => (
                         <Row xs="auto" className="mb-1" key={task.id}>
@@ -227,12 +222,12 @@ export default function TaskList() {
                                         </Button>
                                     </InputGroup>
                                 ) : (
-                                    <>                                    
-                                        <p className="list-item" onClick={() => startEditingTask(task)}>
+                                    <div className="task-container d-flex">
+                                        <p className="list-item me-3" onClick={() => startEditingTask(task)}>
                                             {task.title}
                                         </p>
-                                        <p onClick={() => removeTask(task)}>🗑️</p>
-                                    </>
+                                        <p className="trash-bin" onClick={() => removeTask(task.id)}>🗑️</p>
+                                    </div>
                                 )}
                             </Col>
                         </Row>

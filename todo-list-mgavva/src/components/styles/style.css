@@ -1,7 +1,8 @@
-.list-item:hover {
-    text-decoration: line-through;
-}
-
 li::marker {
     margin-right: 2rem;
+}
+
+.task-container:has(.trash-bin:hover) .list-item {
+    text-decoration: line-through;
+    cursor: pointer;
 }
